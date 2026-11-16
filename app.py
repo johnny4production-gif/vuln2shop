@@ -68,8 +68,10 @@ def create_app(config=None):
     @app.get('/')
     def index():
         q = request.args.get('q', '').strip()
+        pattern = '%' + q.replace('\\', '\\\\').replace('%', '\\%').replace('_', '\\_') + '%'
         products = get_db().execute(
-            f"SELECT * FROM products WHERE name LIKE '%{q}%' OR description LIKE '%{q}%' ORDER BY id",
+            "SELECT * FROM products WHERE name LIKE ? ESCAPE '\\' OR description LIKE ? ESCAPE '\\' ORDER BY id",
+            (pattern, pattern),
         ).fetchall()
         return render_template('index.html', products=products, q=q)
 
